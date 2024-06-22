@@ -1,0 +1,29 @@
+name: loops-2024-talk
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - python=3.12
+  - pip:
+      - aiapy
+      - asdf==3.2.0
+      - asdf-astropy
+      - astropy==6.1.0
+      - astroquery==0.4.7
+      - bokeh==3.4.1
+      - bottleneck==1.4.0
+      - dask==2024.6.2
+      - demregpy==0.6.2
+      - eispac==0.95.0
+      - fiasco
+      - ipykernel==6.29.4
+      - ndcube==2.2.0
+      - reproject==0.13.1
+      - sunkit-dem==0.1.dev34+gac125ec
+      - sunkit-image==0.5.1
+      - sunpy==5.1.3
+      - synthesizar==0.1.dev1059+g0174c4d
+      - tqdm==4.66.4
+      - xarray==2024.5.0
+      - xrtpy==0.4.1.dev30+ga2f61db
+      - zarr==2.18.2
