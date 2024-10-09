@@ -7,17 +7,7 @@ from aiapy.calibrate import register, update_pointing
 from sunkit_image.coalignment import _calculate_shift as calculate_shift
 from eispac.core import EISMap
 
-__all__ = ['shift_pointing', 'cross_correlate_with_aia', 'fix_eis_pointing']
-
-
-def shift_pointing(m_eis, ref_coord):
-    """
-    Given a reference coordinate that corresponds to corrected lower
-    left corner of the EIS map, shift the pointing of the EIS map.
-    """
-    shift_x = ref_coord.Tx - m_eis.bottom_left_coord.Tx
-    shift_y = ref_coord.Ty - m_eis.bottom_left_coord.Ty
-    return m_eis.shift_reference_coord(shift_x, shift_y)
+__all__ = ['cross_correlate_with_aia', 'fix_eis_pointing']
 
 
 def cross_correlate_with_aia(m_eis, m_aia):
@@ -82,9 +72,29 @@ def fix_eis_pointing(l2_dir, corrected_l2_dir):
     m_aia_ref = register(update_pointing(m_aia_ref))
     # Cross-correlate 193 and 195.119 observations
     ref_coord = cross_correlate_with_aia(m_eis_ref, m_aia_ref)
-    # Correct all EIS observations
-    eis_maps_fixed = [shift_pointing(m, ref_coord) for m in eis_maps]
+    # Compute the reference coord offset from the 195.119 line
+    shift_x = ref_coord.Tx - m_eis_ref.bottom_left_coord.Tx
+    shift_y = ref_coord.Ty - m_eis_ref.bottom_left_coord.Ty
+    eis_maps_fixed = [m.shift_reference_coord(shift_x, shift_y) for m in eis_maps]
     # Save out EIS maps
+    fixed_dir = pathlib.Path(corrected_l2_dir)
+    fixed_dir.mkdir(exist_ok=True)
+    for m, f in zip(eis_maps_fixed, eis_files):
+        m.save(fixed_dir / f.name)
+
+
+def fix_eis_calibration(l2_dir, corrected_l2_dir):
+    """
+    Correct EIS calibration using the updated 2023 calibration
+    """
+    import sys
+    sys.path.append('../../../../projects/EISPAC-Tutorial___Calibrations/')
+    from eis_calibration.eis_calib_2023 import calib_2023
+    
+    eis_files = sorted(pathlib.Path(l2_dir).glob('*.int.fits'))
+    eis_maps = sunpy.map.Map(eis_files)
+    eis_maps_fixed = [calib_2023(m) for m in eis_maps]
+
     fixed_dir = pathlib.Path(corrected_l2_dir)
     fixed_dir.mkdir(exist_ok=True)
     for m, f in zip(eis_maps_fixed, eis_files):

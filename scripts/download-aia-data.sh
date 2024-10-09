@@ -10,7 +10,7 @@ DOWNLOADER_PATH=/Users/wtbarnes/Documents/presentations/talks/loops-workshop-202
 RUN_DOWNLOAD="python $DOWNLOADER_PATH"
 ROOT=/Users/wtbarnes/Documents/presentations/talks/loops-workshop-2024-talk/data
 EMAIL="will.t.barnes@gmail.com"
-SAMPLE="1 minute"
+SAMPLE="30 second"
 INTERVAL="12 hour"
 CHANNELS="94,131,171,193,211,335"
 
@@ -30,7 +30,7 @@ $RUN_DOWNLOAD \
     --channels $CHANNELS \
     --download-dir $ROOT/noaa_11967/AIA \
     --start-time 2014-02-03T05:00:00 \
-    --cutout -278 -300 260 100 2014-02-03T11:00:00
+    --cutout -278 -400 260 0 2014-02-03T11:00:00
 
 $RUN_DOWNLOAD \
     --email $EMAIL \
@@ -39,4 +39,4 @@ $RUN_DOWNLOAD \
     --channels $CHANNELS \
     --download-dir $ROOT/noaa_11990/AIA \
     --start-time 2014-03-01T18:00:00 \
-    --cutout -350 -350 150 0 2014-03-02T00:00:00
+    --cutout -350 -400 150 0 2014-03-02T00:00:00

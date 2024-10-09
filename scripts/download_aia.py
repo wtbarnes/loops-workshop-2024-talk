@@ -1,6 +1,3 @@
-import time
-
-import astropy.time
 import astropy.units as u
 import click
 import parfive
@@ -8,7 +5,6 @@ import parfive
 from astropy.coordinates import SkyCoord
 from sunpy.coordinates import Helioprojective, get_horizons_coord
 from sunpy.net import attrs, jsoc
-from sunpy.net.attr import and_
 from sunpy.time import parse_time
 
 

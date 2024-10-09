@@ -8,7 +8,8 @@ import sunpy.map
 import xarray
 
 from sunkit_dem import GenericModel
-from demregpy import dn2dem
+from demregpy.dn2dem import dn2dem
+from demcmc import EmissionLine, TempBins, ContFuncDiscrete, predict_dem_emcee
 from synthesizAR.instruments.util import extend_celestial_wcs
 
 
@@ -52,6 +53,38 @@ class HK12Model(GenericModel):
     @classmethod
     def defines_model_for(self, *args, **kwargs):
         return kwargs.get('model') == 'hk12'
+    
+
+class MCMCModel(GenericModel):
+
+    def _model(self, nwalkers=100, nsteps=100, **kwargs):
+        emission_lines = []
+        for k in self._keys:
+            # NOTE: There is a bug in demmcmc that requires all respones to have units
+            # of 'cm5 K-1' 
+            cont_func=ContFuncDiscrete(self.kernel_temperatures,
+                                       self.kernel[k].value*u.Unit('cm5 K-1'),
+                                       name=k)
+            intensity_unit = u.cm**(-5) * self.kernel[k].unit
+            intensity = self.data[k].data * self.data[k].unit
+            uncertainty = self.data[k].uncertainty.array.squeeze() * self.data[k].unit
+            eline = EmissionLine(
+                cont_func=cont_func,
+                intensity_obs=intensity.to_value(intensity_unit),
+                sigma_intensity_obs=uncertainty.to_value(intensity_unit),
+                name=k,
+            )
+            emission_lines.append(eline)
+        temperature_bins = TempBins(self.temperature_bin_edges)
+        result = predict_dem_emcee(emission_lines,
+                                   temperature_bins,
+                                   nwalkers=nwalkers,
+                                   nsteps=nsteps)
+        return result
+
+    @classmethod
+    def defines_model_for(self, *args, **kwargs):
+        return kwargs.get('model') == 'mcmc'
     
 
 def make_slope_map(dem,
